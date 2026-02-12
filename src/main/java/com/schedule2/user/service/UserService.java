@@ -15,6 +15,7 @@ import java.util.List;
 public class UserService {
     private final UserRepository userRepository;
 
+    @Transactional
     public CreateUserResponse create(CreateUserRequest request) {
 
         User user = new User(
@@ -55,6 +56,7 @@ public class UserService {
                 user.getModifiedAt());
     }
 
+    @Transactional
     public UpdateUserResponse update(Long userid, UpdateUserRequest request) {
         User user = userRepository.findById(userid).orElseThrow(
                 () -> new IllegalStateException("없는 유저입니다."));
@@ -69,6 +71,7 @@ public class UserService {
 
     }
 
+    @Transactional
     public void delete(Long userId) {
 
         boolean existence = userRepository.existsById(userId);
