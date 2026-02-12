@@ -28,24 +28,33 @@ public class UserController {
         return ResponseEntity.ok(userService.getAll());
     }
 
-    @GetMapping("/{userid}") // 유저 단건 조회
+    @GetMapping("/{userId}") // 유저 단건 조회
     public ResponseEntity<GetUserResponse> getOne(
-            @PathVariable Long userid) {
-        return ResponseEntity.ok(userService.getOne(userid));
+            @PathVariable Long userId) {
+        return ResponseEntity.ok(userService.getOne(userId));
     }
 
-    @PatchMapping("/{userid}") // 유저 단건 수정
+    @PatchMapping("/{userId}") // 유저 단건 수정
     public ResponseEntity<UpdateUserResponse> update(
-            @PathVariable Long userid,
+            @SessionAttribute(name = "loginUser", required = false) Long loginUserId,
+            @PathVariable Long userId,
             @Valid @RequestBody UpdateUserRequest request) {
-        return ResponseEntity.ok(userService.update(userid, request));
+        if(loginUserId == null || !loginUserId.equals(userId)) {
+            throw new IllegalStateException("권한이 없습니다");
+        }
+
+        return ResponseEntity.ok(userService.update(userId, request));
     }
 
-    @DeleteMapping("/{userid}") // 유저 회원탈퇴
+    @DeleteMapping("/{userId}") // 유저 회원탈퇴
     public ResponseEntity<Void> delete(
-            @PathVariable Long userid
+            @SessionAttribute(name = "loginUser", required = false) Long loginUserId,
+            @PathVariable Long userId
     ) {
-        userService.delete(userid);
+        if (loginUserId == null || !loginUserId.equals(userId)) {
+            throw new IllegalStateException("권한이 없습니다");
+        }
+        userService.delete(userId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
