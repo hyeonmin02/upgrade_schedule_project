@@ -1,4 +1,7 @@
 package com.schedule2.user.repository;
 
-public interface UserRepository {
+import com.schedule2.user.entity.User;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface UserRepository extends JpaRepository<User, Long> {
 }
