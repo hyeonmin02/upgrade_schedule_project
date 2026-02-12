@@ -2,6 +2,8 @@ package com.schedule2.schedule.controller;
 
 import com.schedule2.schedule.dto.*;
 import com.schedule2.schedule.service.ScheduleService;
+import com.schedule2.user.dto.SessionUser;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +18,13 @@ public class ScheduleController {
     private final ScheduleService scheduleService;
 
     @PostMapping // 일정 생성
-    public ResponseEntity<CreateScheduleResponse> create(@RequestBody CreateScheduleRequest request) {
+    public ResponseEntity<CreateScheduleResponse> create(
+            @SessionAttribute(name = "loginUser", required = false) SessionUser loginUser,
+            @Valid @RequestBody CreateScheduleRequest request) {
+        if (loginUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
         return ResponseEntity.status(HttpStatus.CREATED).body(scheduleService.createSchedule(request));
     }
 
@@ -30,17 +38,26 @@ public class ScheduleController {
         return ResponseEntity.ok(scheduleService.checkSchedule(scheduleId));
     }
 
-    @PutMapping("/{scheduleId}") // 일정 단건 수정
+    @PatchMapping("/{scheduleId}") // 일정 단건 수정
     public ResponseEntity<UpdateScheduleResponse> updateSchedule(
+            @SessionAttribute(name = "loginUser", required = false) SessionUser loginUser,
             @PathVariable Long scheduleId,
-            @RequestBody UpdateScheduleRequest request) {
+            @Valid @RequestBody UpdateScheduleRequest request) {
+
+        if (loginUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
         return ResponseEntity.ok(scheduleService.updateSchedule(scheduleId, request));
     }
 
     @DeleteMapping("/{scheduleId}") // 일정 단건 삭제
     public ResponseEntity<Void> deleteSchedule(
-            @PathVariable Long scheduleId)
-    {
+            @SessionAttribute(name = "loginUser", required = false) SessionUser loginUser,
+            @PathVariable Long scheduleId) {
+        if (loginUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
         scheduleService.deleteSchedule(scheduleId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
