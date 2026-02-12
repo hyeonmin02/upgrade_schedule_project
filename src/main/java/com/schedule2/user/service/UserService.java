@@ -3,6 +3,7 @@ package com.schedule2.user.service;
 import com.schedule2.user.dto.*;
 import com.schedule2.user.entity.User;
 import com.schedule2.user.repository.UserRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,7 +17,7 @@ public class UserService {
     private final UserRepository userRepository;
 
     @Transactional
-    public CreateUserResponse create(CreateUserRequest request) {
+    public RegisterResponse register(RegisterRequest request) {
 
         User user = new User(
                 request.getUserName()
@@ -25,7 +26,7 @@ public class UserService {
 
         User savedUser = userRepository.save(user);
 
-        return new CreateUserResponse(
+        return new RegisterResponse(
                 savedUser.getId(),
                 savedUser.getUserName(),
                 savedUser.getEmail(),
@@ -37,12 +38,13 @@ public class UserService {
         List<User> users = userRepository.findAll();
 
         return users.stream().map(
-                user -> new GetUserResponse(
-                        user.getId()
-                        , user.getUserName()
-                        , user.getEmail()
-                        , user.getCreatedAt()
-                        , user.getModifiedAt())).toList();
+                        user -> new GetUserResponse(
+                                user.getId(),
+                                user.getUserName(),
+                                user.getEmail(),
+                                user.getCreatedAt(),
+                                user.getModifiedAt()))
+                .toList();
     }
 
     public GetUserResponse getOne(Long userid) {
@@ -61,9 +63,10 @@ public class UserService {
         User user = userRepository.findById(userid).orElseThrow(
                 () -> new IllegalStateException("없는 유저입니다."));
 
-        user.updateUser(request.getUserName(), request.getEmail(), request.getPassword());
+        user.updateUser(request.getUserName(), request.getPassword());
 
-        return new UpdateUserResponse(user.getId(),
+        return new UpdateUserResponse(
+                user.getId(),
                 user.getUserName(),
                 user.getEmail(),
                 user.getCreatedAt(),
@@ -79,5 +82,17 @@ public class UserService {
         userRepository.deleteById(userId);
 
 
+    }
+
+    public User login(@Valid LoginUserRequest request) {
+        // 사용자가 요청한 이메일을 가지고 DB에서 이메일이 같은 유저를 찾아서 없으면 예외를 던지고 있으면 user변수에 담아라
+        User user = userRepository.findByEmail(request.getEmail()).orElseThrow(
+                () -> new IllegalStateException("이메일 또는 비밀번호가 올바르지 않습니다!"));
+
+        // DB에서 가져온 유저의 비밀번호와 요청한 패스워드가 일치하지않는가?
+        if (!user.getPassword().equals(request.getPassword())) {
+            throw new IllegalStateException("비밀번호가 일치하지 않습니다!");
+        }
+        return user;
     }
 }

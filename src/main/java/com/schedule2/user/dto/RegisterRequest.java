@@ -5,7 +5,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 
 @Getter
-public class CreateUserRequest {
+public class RegisterRequest {
     @NotBlank
     @Size(max = 4)
     private String userName;

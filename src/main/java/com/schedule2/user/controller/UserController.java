@@ -34,7 +34,7 @@ public class UserController {
         return ResponseEntity.ok(userService.getOne(userid));
     }
 
-    @PutMapping("/{userid}") // 유저 단건 수정
+    @PatchMapping("/{userid}") // 유저 단건 수정
     public ResponseEntity<UpdateUserResponse> update(
             @PathVariable Long userid,
             @Valid @RequestBody UpdateUserRequest request) {
@@ -55,12 +55,9 @@ public class UserController {
 
         User user = userService.login(request);
 
-        SessionUser sessionUser = new SessionUser(user.getId(), user.getEmail());
+        session.setAttribute("loginUser", user.getId());
 
-        session.setAttribute("loginUser", sessionUser);
-
-        LoginUserResponse response = new LoginUserResponse(user.getId(), user.getEmail());
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(new LoginUserResponse(user.getId(), user.getUserName()));
     }
 
     @PostMapping("/logout") // 유저 로그아웃
@@ -68,9 +65,11 @@ public class UserController {
             @SessionAttribute(name = "loginUser", required = false)
             SessionUser sessionUser, HttpSession httpSession) {
 
+        // 401 던져줌 로그인안했는데요? 로그인이 필요합니다.
         if (sessionUser == null) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
+        // 204 던져줌 데이터가 없네요?
         httpSession.invalidate();
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
 
@@ -78,7 +77,13 @@ public class UserController {
 
 
 }
+//        // SessionUser sessionuser 세션에 저장할 최소 정보(id/email)을 담는 상자
+//        SessionUser sessionUser = new SessionUser(user.getId(), user.getEmail());
+//
+//        session.setAttribute("loginUser", sessionUser); // 로그인 상태가 됨
+//        //"loginUser" 라는 이름(Key)으로 sessionUser 객체(Value)를 세션 저장소에 저장
+
+//        LoginUserResponse response = new LoginUserResponse(user.getId(), user.getEmail());
+//        return ResponseEntity.ok(response);
 
 
-// 로그인할 때 포스트매핑 유저네임과 패스워드같은 데이터들을 보내줘야함
-// body값이 있어야하니까 get으로 하는게 상태코드로 볼때 올바를 수 있지만 get은 조회이고 body값이 없기 때문에 PostMapping이 맞다
