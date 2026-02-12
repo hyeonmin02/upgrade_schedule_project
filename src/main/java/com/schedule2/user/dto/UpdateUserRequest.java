@@ -1,19 +1,17 @@
 package com.schedule2.user.dto;
 
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 
 @Getter
 public class UpdateUserRequest {
-    @NotBlank
-    @Size(max = 4)
+    @Size(max = 4, message = "닉네임은 최대 4글자만 가능합니다!")
     private String userName;
-    @NotBlank
-    @Email
+
+    @Email(message = "이메일 형식으로만 입력해주세요!")
     private String Email;
-    @NotBlank
-    @Size(min = 8)
+
+    @Size(min = 8, message = "비밀번호는 8자 이상부터 가능합니다.")
     private String password;
 }

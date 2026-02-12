@@ -13,7 +13,12 @@ public class UpdateUserResponse {
     private final LocalDateTime modifiedAt;
 
 
-    public UpdateUserResponse(Long id, String userName, String email, LocalDateTime createdAt, LocalDateTime modifiedAt) {
+    public UpdateUserResponse(
+            Long id,
+            String userName,
+            String email,
+            LocalDateTime createdAt,
+            LocalDateTime modifiedAt) {
         this.id = id;
         this.userName = userName;
         this.email = email;

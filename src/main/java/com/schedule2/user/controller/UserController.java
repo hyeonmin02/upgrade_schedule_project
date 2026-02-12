@@ -72,18 +72,7 @@ public class UserController {
         // 204 던져줌 데이터가 없네요?
         httpSession.invalidate();
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-
     }
-
-
 }
-//        // SessionUser sessionuser 세션에 저장할 최소 정보(id/email)을 담는 상자
-//        SessionUser sessionUser = new SessionUser(user.getId(), user.getEmail());
-//
-//        session.setAttribute("loginUser", sessionUser); // 로그인 상태가 됨
-//        //"loginUser" 라는 이름(Key)으로 sessionUser 객체(Value)를 세션 저장소에 저장
-
-//        LoginUserResponse response = new LoginUserResponse(user.getId(), user.getEmail());
-//        return ResponseEntity.ok(response);
 
 

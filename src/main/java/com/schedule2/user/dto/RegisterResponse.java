@@ -12,7 +12,12 @@ public class RegisterResponse {
     private final LocalDateTime createdAt;
     private final LocalDateTime modifiedAt;
 
-    public RegisterResponse(Long id, String userName, String email, LocalDateTime createdAt, LocalDateTime modifiedAt) {
+    public RegisterResponse(
+            Long id,
+            String userName,
+            String email,
+            LocalDateTime createdAt,
+            LocalDateTime modifiedAt) {
         this.id = id;
         this.userName = userName;
         this.email = email;
