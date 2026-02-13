@@ -16,25 +16,25 @@ public class Schedule extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 10)
     private String title;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 50)
     private String content;
 
-    @Column(nullable = false, unique = true)
-    private String userName;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
-//    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-//    @JoinColumn(name = "user_id", nullable = false)
-//    private User user;
-
-    public Schedule(String title, String content, String userName) {
+    public Schedule(String title, String content, User user) {
 
         this.title = title;
         this.content = content;
-        this.userName = userName;
-//        this.user = user;
+        this.user = user;
+    }
+
+    public String getUserName() {
+        return this.user.getUserName();
     }
 
     public void update(String title, String content) {
