@@ -23,6 +23,24 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.register(request));
     }
 
+    @PostMapping("/login") // 유저 로그인
+    public ResponseEntity<LoginUserResponse> login(
+            @Valid @RequestBody LoginUserRequest request, HttpSession session) {
+
+        User user = userService.login(request);
+
+        session.setAttribute("loginUser", user.getId());
+
+        return ResponseEntity.ok(new LoginUserResponse(user.getId(), user.getUserName()));
+    }
+
+    @PostMapping("/logout") // 유저 로그아웃
+    public ResponseEntity<Void> logout(HttpSession httpSession) {
+
+        httpSession.invalidate();
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
     @GetMapping // 유저 전체조회
     public ResponseEntity<List<GetUserResponse>> getAll() {
         return ResponseEntity.ok(userService.getAll());
@@ -39,11 +57,8 @@ public class UserController {
             @SessionAttribute(name = "loginUser", required = false) Long loginUserId,
             @PathVariable Long userId,
             @Valid @RequestBody UpdateUserRequest request) {
-        if(loginUserId == null || !loginUserId.equals(userId)) {
-            throw new IllegalStateException("권한이 없습니다");
-        }
 
-        return ResponseEntity.ok(userService.update(userId, request));
+        return ResponseEntity.ok(userService.update(userId, loginUserId, request));
     }
 
     @DeleteMapping("/{userId}") // 유저 회원탈퇴
@@ -51,37 +66,7 @@ public class UserController {
             @SessionAttribute(name = "loginUser", required = false) Long loginUserId,
             @PathVariable Long userId
     ) {
-        if (loginUserId == null || !loginUserId.equals(userId)) {
-            throw new IllegalStateException("권한이 없습니다");
-        }
-        userService.delete(userId);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-    }
-
-    @PostMapping("/login") // 유저 로그인
-    public ResponseEntity<LoginUserResponse> login(
-            @Valid @RequestBody LoginUserRequest request, HttpSession session) {
-
-        User user = userService.login(request);
-
-        session.setAttribute("loginUser", user.getId());
-
-        return ResponseEntity.ok(new LoginUserResponse(user.getId(), user.getUserName()));
-    }
-
-    @PostMapping("/logout") // 유저 로그아웃
-    public ResponseEntity<Void> logout(
-            @SessionAttribute(name = "loginUser", required = false)
-            SessionUser sessionUser, HttpSession httpSession) {
-
-        // 401 던져줌 로그인안했는데요? 로그인이 필요합니다.
-        if (sessionUser == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-        // 204 던져줌 데이터가 없네요?
-        httpSession.invalidate();
+        userService.delete(userId, loginUserId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }
-
-
