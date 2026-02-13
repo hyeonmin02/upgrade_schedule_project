@@ -1,5 +1,9 @@
 package com.schedule2.schedule.service;
 
+import com.schedule2.exception.ForbiddenException;
+import com.schedule2.exception.ScheduleNotFoundException;
+import com.schedule2.exception.UnauthorizedException;
+import com.schedule2.exception.UserNotFoundException;
 import com.schedule2.schedule.dto.*;
 import com.schedule2.schedule.entity.Schedule;
 import com.schedule2.schedule.repository.ScheduleRepository;
@@ -22,11 +26,11 @@ public class ScheduleService {
     public CreateScheduleResponse createSchedule(Long loginUserId, CreateScheduleRequest request) {
 
         if (loginUserId == null) {
-            throw new IllegalStateException("로그인이 필요합니다.");
+            throw new UnauthorizedException("로그인이 필요합니다.");
         }
 
         User user = userRepository.findById(loginUserId).orElseThrow(
-                () -> new IllegalStateException("없는 유저입니다."));
+                () -> new UserNotFoundException("없는 유저입니다."));
 
         Schedule schedule = new Schedule(
                 request.getTitle(),
@@ -60,7 +64,7 @@ public class ScheduleService {
 
     public GetScheduleResponse checkSchedule(Long scheduleId) {
         Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(
-                () -> new IllegalStateException("없는 스케줄입니다."));
+                () -> new ScheduleNotFoundException("없는 스케줄입니다."));
 
         return new GetScheduleResponse(
                 schedule.getId(),
@@ -75,10 +79,14 @@ public class ScheduleService {
     public UpdateScheduleResponse updateSchedule(Long loginUserId, Long scheduleId, UpdateScheduleRequest request) {
 
         if (loginUserId == null) {
-            throw new IllegalStateException("로그인이 필요합니다.");
+            throw new UnauthorizedException("로그인이 필요합니다.");
         }
         Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(
-                () -> new IllegalStateException("없는 스케줄입니다."));
+                () -> new ScheduleNotFoundException("없는 스케줄입니다."));
+
+        if (!schedule.getUser().getId().equals(loginUserId)) {
+            throw new ForbiddenException("권한이 없습니다.");
+        }
 
         schedule.update(request.getTitle(), request.getContent());
 
@@ -94,13 +102,15 @@ public class ScheduleService {
     @Transactional
     public void deleteSchedule(Long loginUserId, Long scheduleId) {
         if (loginUserId == null) {
-            throw new IllegalStateException("로그인이 필요합니다.");
+            throw new UnauthorizedException("로그인이 필요합니다.");
+        }
+        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(
+                () -> new ScheduleNotFoundException("없는 스케줄입니다."));
+
+        if (!schedule.getUser().getId().equals(loginUserId)) {
+            throw new ForbiddenException("권한이 없습니다.");
         }
 
-        boolean existence = scheduleRepository.existsById(scheduleId);
-        if (!existence) {
-            throw new IllegalStateException("없는 스케줄입니다.");
-        }
         scheduleRepository.deleteById(scheduleId);
     }
 }
