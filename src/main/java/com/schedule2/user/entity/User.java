@@ -15,13 +15,13 @@ public class User extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true, length = 10) // 회원가입 시 닉네임 필수값, 중복 불가능
+    @Column(nullable = false, unique = true, length = 4) // 회원가입 시 닉네임 필수값, 중복 불가능
     private String userName;
 
-    @Column(nullable = false, unique = true, length = 100) // 회원가입 시 Email은 필수값, 같은 이메일 사용불가
+    @Column(nullable = false, unique = true) // 회원가입 시 Email은 필수값, 같은 이메일 사용불가
     private String email;
 
-    @Column(nullable = false, length = 20) // 회원가입 시 비밀번호 필수값
+    @Column(nullable = false) // 회원가입 시 비밀번호 필수값
     private String password;
 
     // 유저 생성
